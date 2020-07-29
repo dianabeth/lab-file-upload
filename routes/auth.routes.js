@@ -9,6 +9,15 @@ const mongoose = require('mongoose');
 
 const routeGuard = require('../configs/route-guard.config');
 
+const multer = require('multer');
+const cloudinary = require('cloudinary');
+const multerStorageCloudinary = require('multer-storage-cloudinary');
+
+const storage = new multerStorageCloudinary.CloudinaryStorage({
+  cloudinary: cloudinary.v2
+});
+
+const upload = multer({ storage });
 ////////////////////////////////////////////////////////////////////////
 ///////////////////////////// SIGNUP //////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -17,9 +26,10 @@ const routeGuard = require('../configs/route-guard.config');
 router.get('/signup', (req, res) => res.render('auth/signup'));
 
 // .post() route ==> to process form data
-router.post('/signup', (req, res, next) => {
+router.post('/signup', routeGuard, upload.single('pictures'), (req, res, next) => {
+  const url = req.file.path;
   const { username, email, password } = req.body;
-
+  console.log(username, email, password, url);
   if (!username || !email || !password) {
     res.render('auth/signup', { errorMessage: 'All fields are mandatory. Please provide your username, email and password.' });
     return;
@@ -45,7 +55,8 @@ router.post('/signup', (req, res, next) => {
         // passwordHash => this is the key from the User model
         //     ^
         //     |            |--> this is placeholder (how we named returning value from the previous method (.hash()))
-        passwordHash: hashedPassword
+        passwordHash: hashedPassword,
+        profilePic: url
       });
     })
     .then(userFromDB => {

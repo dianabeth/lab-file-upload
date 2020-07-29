@@ -29,10 +29,12 @@ postsRouter.post('/postForm', routeGuard, upload.single('pictures'), (request, r
 
   Posts.create({
     content,
-    creator: request.session.userId,
-    url
+    creator: request.session.currentUser._id,
+    picPath: url,
+    picName: request.file.filename
   })
     .then(post => {
+      console.log('this is a post:', post);
       response.redirect('/');
     })
     .catch(error => {
@@ -41,17 +43,11 @@ postsRouter.post('/postForm', routeGuard, upload.single('pictures'), (request, r
 });
 
 postsRouter.get('/posts', (request, response, next) => {
-  response.render('/posts');
-});
-
-postsRouter.get('/:id', (request, response, next) => {
-  const id = request.params.id;
-
-  Posts.findById(id)
+  Posts.find
     .populate('creator')
     .then(post => {
       if (post) {
-        response.render('posts', { post: post });
+        response.render('posts/posts', { posts: post });
       } else {
         next();
       }

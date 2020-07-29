@@ -26,10 +26,10 @@ const upload = multer({ storage });
 router.get('/signup', (req, res) => res.render('auth/signup'));
 
 // .post() route ==> to process form data
-router.post('/signup', routeGuard, upload.single('pictures'), (req, res, next) => {
+router.post('/signup', upload.single('pictures'), (req, res, next) => {
   const url = req.file.path;
   const { username, email, password } = req.body;
-  console.log(username, email, password, url);
+  //console.log(username, email, password, url);
   if (!username || !email || !password) {
     res.render('auth/signup', { errorMessage: 'All fields are mandatory. Please provide your username, email and password.' });
     return;
